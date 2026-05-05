@@ -4,6 +4,12 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "aws_profile" {
+  description = "AWS CLI named profile to use for authentication"
+  type        = string
+  default     = "default"
+}
+
 variable "bucket_name" {
   description = "Name of the S3 bucket (must be globally unique)"
   type        = string

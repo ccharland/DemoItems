@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Demo CloudFormation template that creates an S3 bucket and an SSM Parameter
+  to verify the environment is configured to deploy resources.
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket (must be globally unique)
+
+  SSMParameterName:
+    Type: String
+    Description: Name of the SSM Parameter (must start with /)
+    Default: /demo/parameter
+
+  SSMParameterValue:
+    Type: String
+    Description: Value stored in the SSM Parameter
+    Default: demo-value
+
+Resources:
+  DemoBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Name
+          Value: !Ref BucketName
+        - Key: Environment
+          Value: demo
+
+  DemoSSMParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Ref SSMParameterName
+      Type: String
+      Value: !Ref SSMParameterValue
+      Tags:
+        Environment: demo
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref DemoBucket
+
+  BucketArn:
+    Description: ARN of the S3 bucket
+    Value: !GetAtt DemoBucket.Arn
+
+  SSMParameterName:
+    Description: Name of the SSM Parameter
+    Value: !Ref DemoSSMParameter
+
+  SSMParameterArn:
+    Description: ARN of the SSM Parameter
+    Value: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${SSMParameterName}"
